@@ -4,8 +4,8 @@ import io.minio.MinioClient
 import io.minio.PutObjectArgs
 import io.minio.GetPresignedObjectUrlArgs
 import io.minio.http.Method
-import notes.voice.database.VoiceNote
-import notes.voice.database.VoiceNoteRepository
+import notes.voice.domain.VoiceNote
+import notes.voice.repository.VoiceNoteRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service

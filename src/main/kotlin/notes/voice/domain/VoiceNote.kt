@@ -1,4 +1,4 @@
-package notes.voice.database
+package notes.voice.domain
 
 // VoiceNote.kt
 import jakarta.persistence.Column
