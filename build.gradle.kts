@@ -32,6 +32,7 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("io.minio:minio:8.5.11")
 	implementation("org.springframework.kafka:spring-kafka")
+	implementation("org.reactivestreams:reactive-streams:1.0.4")//TODO: Check if this is how to add reactive streams or some BOM is needed
 	compileOnly("org.projectlombok:lombok")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	runtimeOnly("com.h2database:h2")
