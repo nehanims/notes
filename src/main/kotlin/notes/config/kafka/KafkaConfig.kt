@@ -1,4 +1,4 @@
-package notes.voice.config.kafka
+package notes.config.kafka
 
 import org.apache.kafka.clients.admin.AdminClientConfig
 import org.apache.kafka.clients.admin.NewTopic
@@ -11,7 +11,7 @@ import org.springframework.kafka.core.KafkaAdmin
 class KafkaConfig(
     @Value("\${kafka.bootstrap-address}")
     private val servers: String,
-    @Value("\${kafka.topics.test_topic}")
+    @Value("\${kafka.topics.voice-note}")
     private val topic: String
 ) {
 

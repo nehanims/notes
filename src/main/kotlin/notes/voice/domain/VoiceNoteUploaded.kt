@@ -2,7 +2,7 @@ package notes.voice.domain
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
-data class TestMessage (
+data class VoiceNoteUploaded (
 @JsonProperty("name")
 val name: String,
 @JsonProperty("sku")

@@ -4,7 +4,7 @@ import io.minio.MinioClient
 import io.minio.PutObjectArgs
 import io.minio.GetPresignedObjectUrlArgs
 import io.minio.http.Method
-import notes.voice.domain.TestMessage
+import notes.voice.domain.VoiceNoteUploaded
 import notes.voice.domain.VoiceNote
 import notes.voice.repository.VoiceNoteRepository
 import org.slf4j.LoggerFactory
@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit
 
 @Service
 class VoiceNoteService (
-    @Value("\${kafka.topics.test_topic}") val topic: String,
+    @Value("\${kafka.topics.voice-note}") val topic: String,
     @Autowired
     private val kafkaTemplate: KafkaTemplate<String, Any>
 ){
@@ -67,16 +67,16 @@ class VoiceNoteService (
         )
         repository.save(voiceNote)
         //produceKafkaMessage(TestMessage("VoiceNote", voiceNote.url))//TODO  make sure all these operations are synchronous and transactional -- if any of the operations fail everything should be rolled back - BUT look more into whether that's the right approach, would you want partially commited state in the database if it is not written to kafka? or file uploaded if it fails to write to metadata store?
-        produceKafkaMessage(TestMessage("VoiceNote", voiceNote.filename))
+        produceKafkaMessage(VoiceNoteUploaded("VoiceNote", voiceNote.filename))
         return fileUrl
     }
 
-    fun produceKafkaMessage(testMessage: TestMessage): ResponseEntity<Any> {
+    fun produceKafkaMessage(voiceNoteUploaded: VoiceNoteUploaded): ResponseEntity<Any> {
         return try {
             log.info("Uploaded voice note")
-            log.info("Sending message to Kafka {}", testMessage)
-            val message: Message<TestMessage> = MessageBuilder
-                .withPayload(testMessage)
+            log.info("Sending message to Kafka {}", voiceNoteUploaded)
+            val message: Message<VoiceNoteUploaded> = MessageBuilder
+                .withPayload(voiceNoteUploaded)
                 .setHeader(KafkaHeaders.TOPIC, topic)
                 .setHeader("X-Custom-Header", "Custom header here")
                 .build()

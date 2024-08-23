@@ -1,21 +1,19 @@
-package notes.voice.service
+package notes.transcribe.service
 
-import io.minio.MinioClient
 import io.minio.GetObjectArgs
-
+import io.minio.MinioClient
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Service
-import org.springframework.web.client.RestTemplate
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.core.io.ByteArrayResource
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
-import org.springframework.http.client.MultipartBodyBuilder
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.util.MultiValueMap
-import org.springframework.core.io.ByteArrayResource
 import org.springframework.http.ResponseEntity
-
+import org.springframework.http.client.MultipartBodyBuilder
+import org.springframework.stereotype.Service
+import org.springframework.util.MultiValueMap
+import org.springframework.web.client.RestTemplate
 import java.io.InputStream
 
 @Service
@@ -114,6 +112,3 @@ class TranscriptionService(
         return downloadAndSendFileToEndpoint(fileName)
     }
 }
-
-
-
