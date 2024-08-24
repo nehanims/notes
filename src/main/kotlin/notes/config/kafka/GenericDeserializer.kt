@@ -1,12 +1,23 @@
 package notes.config.kafka
 
-import kotlinx.serialization.KSerializer
-import kotlinx.serialization.json.Json
-import org.apache.kafka.common.serialization.Deserializer
-
-
-class GenericDeserializer<T>(private val deserializer: KSerializer<T>) : Deserializer<T> {
-    override fun deserialize(topic: String?, data: ByteArray?): T {
-        return Json.decodeFromString(deserializer, data?.toString(Charsets.UTF_8)!!)
-    }
-}
+//
+//import com.fasterxml.jackson.databind.ObjectMapper
+//import org.apache.kafka.common.errors.SerializationException
+//import org.apache.kafka.common.serialization.Deserializer
+//import org.slf4j.LoggerFactory
+//import java.nio.charset.StandardCharsets.UTF_8
+//
+//class GenericDeserializer<T>(private val clazz: Class<T>) : Deserializer<T> {
+//    private val objectMapper = ObjectMapper()
+//    private val log = LoggerFactory.getLogger(javaClass)
+//
+//    override fun deserialize(topic: String?, data: ByteArray?): T? {
+//        log.info("Deserializing...")
+//        return objectMapper.readValue(
+//            String(data ?: throw SerializationException("Error when deserializing byte[]"), UTF_8),
+//            clazz
+//        )
+//    }
+//
+//    override fun close() {}
+//}

@@ -1,5 +1,15 @@
 package notes.transcribe.domain
-import kotlinx.serialization.Serializable
 
-@Serializable
-data class VoiceNoteTranscribed(val id: String, val text: String, val voiceNoteId: String)
+import com.fasterxml.jackson.annotation.JsonProperty
+
+data class VoiceNoteTranscribed (
+    @JsonProperty("id")
+    val id: Long,
+    @JsonProperty("transcribedFilename")
+    val transcribedFilename: String,
+    @JsonProperty("transcribedText")
+    val transcribedText: String,
+    @JsonProperty("voiceNoteUrl")
+    val voiceNoteFilename: String?
+
+)

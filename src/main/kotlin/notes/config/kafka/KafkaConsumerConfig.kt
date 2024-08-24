@@ -1,5 +1,7 @@
 package notes.config.kafka
 
+import notes.transcribe.domain.VoiceNoteTranscribed
+import notes.voice.domain.VoiceNoteUploaded
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.springframework.beans.factory.annotation.Value
@@ -10,6 +12,7 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
 import org.springframework.kafka.core.ConsumerFactory
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 import org.springframework.kafka.listener.ContainerProperties
+import org.springframework.kafka.support.serializer.JsonDeserializer
 
 
 @EnableKafka
@@ -20,7 +23,7 @@ class KafkaConsumerConfig(
 ) {
 
     @Bean
-    fun consumerFactory(): ConsumerFactory<String?, Any?> {
+    fun consumerFactory(): ConsumerFactory<String?, VoiceNoteUploaded?> {
         val props: MutableMap<String, Any> = HashMap()
         props[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] = servers
         props[ConsumerConfig.GROUP_ID_CONFIG] = "ppr"
@@ -31,11 +34,34 @@ class KafkaConsumerConfig(
     }
 
     @Bean
-    fun kafkaListenerContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, Any>? {
-        val factory = ConcurrentKafkaListenerContainerFactory<String, Any>()
+    fun kafkaListenerContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, VoiceNoteUploaded> {//TODO how can a producer bean potentially return null???? its whole point is to produce beans!!
+        val factory = ConcurrentKafkaListenerContainerFactory<String, VoiceNoteUploaded>()
         factory.consumerFactory = consumerFactory()
         factory.containerProperties.ackMode = ContainerProperties.AckMode.MANUAL_IMMEDIATE
         factory.containerProperties.isSyncCommits = true
         return factory
     }
+
+    @Bean
+    fun transcribedConsumerFactory(): ConsumerFactory<String?, VoiceNoteTranscribed?> {
+        val props: MutableMap<String, Any> = HashMap()
+        props[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] = servers
+        props[ConsumerConfig.GROUP_ID_CONFIG] = "transcribed-consumer"
+        props[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
+        props[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = VoiceNoteTranscribedDeserializer::class.java
+        props[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "earliest"
+        return DefaultKafkaConsumerFactory(props)
+    }
+
+    @Bean
+    fun kafkaTranscribedListenerContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, VoiceNoteTranscribed> {//TODO how can a producer bean potentially return null???? its whole point is to produce beans!!
+        val factory = ConcurrentKafkaListenerContainerFactory<String, VoiceNoteTranscribed>()
+        factory.consumerFactory = transcribedConsumerFactory()
+        factory.containerProperties.ackMode = ContainerProperties.AckMode.MANUAL_IMMEDIATE
+        factory.containerProperties.isSyncCommits = true
+        return factory
+    }
+
+
+
 }

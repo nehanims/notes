@@ -18,6 +18,7 @@ class KafkaConfig(
     private val voiceNoteTranscribedTopic: String
 ) {
 
+    //TODO: Is this needed in spring boot?
     @Bean
     fun kafkaAdmin(): KafkaAdmin {
         val configs: MutableMap<String, Any?> = HashMap()
@@ -25,11 +26,13 @@ class KafkaConfig(
         return KafkaAdmin(configs)
     }
 
+    //TODO: Are these doing anything
     @Bean("voiceNoteTopic")
     fun voiceNoteUploadedTopicFactory(): NewTopic {
         return NewTopic(voiceNoteUploadedTopic, 1, 1.toShort())
     }
 
+    //TODO: Are these doing anything
     @Bean("transcribedTopic")
     fun voiceNoteTranscribedTopicFactory(): NewTopic {
         return NewTopic(voiceNoteTranscribedTopic, 1, 1.toShort())

@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit
 class VoiceNoteService (
     @Value("\${kafka.topics.voice-note}") val topic: String,
     @Autowired
-    private val kafkaTemplate: KafkaTemplate<String, Any>
+    private val kafkaTemplate: KafkaTemplate<String, VoiceNoteUploaded>
 ){
     private val log = LoggerFactory.getLogger(javaClass)
     //TODO should all these be constructor injected?
@@ -49,6 +49,7 @@ class VoiceNoteService (
                 .contentType(file.contentType)
                 .build()
         )
+        //TODO remove this URL from the entity it is useless
         val fileUrl = minioClient.getPresignedObjectUrl( GetPresignedObjectUrlArgs.builder()
             .method(Method.GET)
             .bucket(bucketName)

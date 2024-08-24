@@ -2,70 +2,47 @@ package notes.transcribe.service
 
 import io.minio.GetObjectArgs
 import io.minio.MinioClient
+import io.minio.PutObjectArgs
+import notes.transcribe.domain.Transcription
+import notes.transcribe.domain.VoiceNoteTranscribed
+import notes.transcribe.repository.TranscriptionRepository
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.ByteArrayResource
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
-import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
+import org.springframework.http.*
 import org.springframework.http.client.MultipartBodyBuilder
+import org.springframework.kafka.core.KafkaTemplate
+import org.springframework.kafka.support.KafkaHeaders
+import org.springframework.messaging.Message
+import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
 import org.springframework.util.MultiValueMap
 import org.springframework.web.client.RestTemplate
+import java.io.ByteArrayInputStream
 import java.io.InputStream
 
 @Service
 class TranscriptionService(
+    @Value("\${kafka.topics.voice-note-transcription}") val transcriptionTopic: String,
+    @Value("\${transcription.endpoint.host}") val transcriptionEndpoint: String,
     @Autowired private val minioClient: MinioClient,
+    @Autowired private val repository: TranscriptionRepository,
+    @Autowired private val kafkaTemplate: KafkaTemplate<String, VoiceNoteTranscribed>,
     @Value("\${minio.bucket-name}") private val minioBucketName: String
 ) {
 
-    /*private val minioClient: MinioClient = MinioClient.builder()
-        .endpoint(minioUrl)
-        .credentials(minioAccessKey, minioSecretKey)
-        .build()*/
-
-    /*
-    fun downloadAndSendFileToEndpoint(fileName: String) {
-        // Download the file from MinIO
-        val inputStream: InputStream = minioClient.getObject(
-            GetObjectArgs.builder()
-                .bucket(bucketName)
-                .`object`(fileName)
-                .build()
-        )
-
-        // Prepare the multipart request
-        val headers = HttpHeaders().apply {
-            contentType = MediaType.MULTIPART_FORM_DATA
-            set("accept", "application/json")
-        }
-
-        val bodyBuilder = MultipartBodyBuilder()
-        bodyBuilder.part("audio_file", inputStream, MediaType.APPLICATION_OCTET_STREAM)
-            .filename(fileName)
-            .header("Content-Type", "video/webm") // Ensure the correct content type
-
-        val httpEntity: HttpEntity<MultiValueMap<String, HttpEntity<*>>> = HttpEntity(bodyBuilder.build(), headers)
-
-        val restTemplate = RestTemplate()
-        val response = restTemplate.postForEntity(
-            "http://localhost:9000/asr?encode=true&task=transcribe&language=en&word_timestamps=false&output=txt",
-            httpEntity,
-            String::class.java
-        )
-
-        // Handle the response
-        println("Response from server: ${response.body}")
-    }
-    */
-
     private val log = LoggerFactory.getLogger(javaClass)
 
-    fun downloadAndSendFileToTranscriptionEndpoint(fileName: String) : ResponseEntity<String> {
+    //TODO read carefully and fix the return types etc for all these methods
 
+    fun transcribe(audioFileName: String): ResponseEntity<String> {
+        val transcribedText = downloadAndTranscribeAudioFile(audioFileName)
+        saveTranscription(audioFileName, transcribedText)
+        return ResponseEntity.ok(transcribedText)
+    }
+
+    fun downloadAndTranscribeAudioFile(fileName: String): String? {
 
         // Fetch the file from MinIO as InputStream
         val stream: InputStream = minioClient.getObject(
@@ -96,19 +73,72 @@ class TranscriptionService(
         val requestEntity: HttpEntity<MultiValueMap<String, HttpEntity<*>>> = HttpEntity(bodyBuilder.build(), headers)
 
         // Send the file to the endpoint
+        log.info("Sending request to ASR service")
         val restTemplate = RestTemplate()
         val response = restTemplate.postForEntity(
-            "http://localhost:9900/asr?encode=true&task=transcribe&language=en&word_timestamps=false&output=txt",
+            "${transcriptionEndpoint}/asr?encode=true&task=transcribe&language=en&word_timestamps=false&output=txt",
             requestEntity,
             String::class.java
         )
 
         // Handle the response
-        log.info("Response: ${response.body}")
-        return response
+        log.info("Received response: ${response.body}")
+
+        return response.body
     }
 
-    fun transcribe(fileName: String) : ResponseEntity<String> {
-        return downloadAndSendFileToTranscriptionEndpoint(fileName)
+    private fun saveTranscription(audioFileName: String, transcribedText: String?): Transcription {
+        // Upload to minio
+        val filename = "${System.currentTimeMillis()}-transcription.txt"
+        uploadString(minioBucketName, filename, transcribedText ?: "")
+
+        val transcription = Transcription(
+            transcriptionFilename = filename,
+            audioFilename = audioFileName
+        )
+        repository.save(transcription)
+        publishTranscriptionToKafka(transcribedText, transcription)
+        return transcription
     }
+
+    private fun publishTranscriptionToKafka(transcribedMessage: String?, transcription: Transcription) {
+
+        val voiceNoteTranscribed = VoiceNoteTranscribed(
+            id = transcription.id,
+            transcribedFilename = transcription.transcriptionFilename,
+            transcribedText = transcribedMessage ?: "",
+            voiceNoteFilename = transcription.audioFilename
+        )
+
+        log.info("Transcription: {}", transcribedMessage)
+
+        log.info("Sending message to Kafka {}", voiceNoteTranscribed)
+        val message: Message<VoiceNoteTranscribed> = MessageBuilder
+            .withPayload(voiceNoteTranscribed)
+            .setHeader(KafkaHeaders.TOPIC, transcriptionTopic)
+            .setHeader("X-Custom-Header", "Custom header here")
+            .build()
+        kafkaTemplate.send(message)
+        log.info("Message sent with success")
+        //ResponseEntity.ok().build()
+
+    }
+
+    fun uploadString(bucketName: String, objectName: String, content: String) {
+
+        log.info("Uploading string to MinIO")
+        val byteArrayInputStream = ByteArrayInputStream(content.toByteArray())
+
+        minioClient.putObject(
+            PutObjectArgs.builder()
+                .bucket(bucketName)
+                .`object`(objectName)
+                .stream(byteArrayInputStream, content.length.toLong(), -1)
+                .contentType("text/plain")
+                .build()
+        )
+        log.info("Uploaded string to MinIO")
+    }
+
+
 }
