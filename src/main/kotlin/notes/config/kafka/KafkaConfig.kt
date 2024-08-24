@@ -1,5 +1,6 @@
 package notes.config.kafka
 
+
 import org.apache.kafka.clients.admin.AdminClientConfig
 import org.apache.kafka.clients.admin.NewTopic
 import org.springframework.beans.factory.annotation.Value
@@ -12,7 +13,9 @@ class KafkaConfig(
     @Value("\${kafka.bootstrap-address}")
     private val servers: String,
     @Value("\${kafka.topics.voice-note}")
-    private val topic: String
+    private val voiceNoteUploadedTopic: String,
+    @Value("\${kafka.topics.voice-note-transcription}")
+    private val voiceNoteTranscribedTopic: String
 ) {
 
     @Bean
@@ -22,9 +25,14 @@ class KafkaConfig(
         return KafkaAdmin(configs)
     }
 
-    @Bean
-    fun testTopic(): NewTopic {
-        return NewTopic(topic, 1, 1.toShort())
+    @Bean("voiceNoteTopic")
+    fun voiceNoteUploadedTopicFactory(): NewTopic {
+        return NewTopic(voiceNoteUploadedTopic, 1, 1.toShort())
+    }
+
+    @Bean("transcribedTopic")
+    fun voiceNoteTranscribedTopicFactory(): NewTopic {
+        return NewTopic(voiceNoteTranscribedTopic, 1, 1.toShort())
     }
 
 }

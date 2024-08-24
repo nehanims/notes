@@ -17,7 +17,7 @@ class VoiceNoteUploadConsumer(@Autowired
     private val logger = LoggerFactory.getLogger(javaClass)
 
     //TODO maybe call this VoiceNoteUploadedEventConsumer
-    @KafkaListener(topics = ["\${kafka.topics.voice-note}"], groupId = "ppr")
+    @KafkaListener(topics = ["\${kafka.topics.voice-note}"], groupId = "ppr")//TODO change group id name to something more meaningful
     fun listenGroupVoiceNoteUpload(voiceNoteUploadRecord: ConsumerRecord<Any, VoiceNoteUploaded>, ack: Acknowledgment) {
         logger.info("Message received key {}", voiceNoteUploadRecord.key())
         logger.info("Message received value {}", voiceNoteUploadRecord.value().sku)

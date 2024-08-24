@@ -1,8 +1,6 @@
 package notes.voice.service
 
-import io.minio.MinioClient
-import io.minio.PutObjectArgs
-import io.minio.GetPresignedObjectUrlArgs
+import io.minio.*
 import io.minio.http.Method
 import notes.voice.domain.VoiceNoteUploaded
 import notes.voice.domain.VoiceNote
@@ -19,6 +17,7 @@ import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import java.io.InputStream
+import java.time.LocalDate
 import java.util.concurrent.TimeUnit
 
 @Service
@@ -39,7 +38,7 @@ class VoiceNoteService (
     @Value("\${minio.bucket-name}")
     private lateinit var bucketName: String
 
-    fun uploadFile(file: MultipartFile, metadata: Map<String, String>): String {
+    fun uploadFile(file: MultipartFile, metadata: Map<String, String>): VoiceNote {
         val filename = "${System.currentTimeMillis()}-${file.originalFilename}"
         val inputStream: InputStream = file.inputStream
         minioClient.putObject(
@@ -68,7 +67,7 @@ class VoiceNoteService (
         repository.save(voiceNote)
         //produceKafkaMessage(TestMessage("VoiceNote", voiceNote.url))//TODO  make sure all these operations are synchronous and transactional -- if any of the operations fail everything should be rolled back - BUT look more into whether that's the right approach, would you want partially commited state in the database if it is not written to kafka? or file uploaded if it fails to write to metadata store?
         produceKafkaMessage(VoiceNoteUploaded("VoiceNote", voiceNote.filename))
-        return fileUrl
+        return voiceNote
     }
 
     fun produceKafkaMessage(voiceNoteUploaded: VoiceNoteUploaded): ResponseEntity<Any> {
@@ -87,6 +86,39 @@ class VoiceNoteService (
             log.error("Exception: {}",e.message)
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error sending message")
         }
+    }
+
+    fun getTodaysRecordings(): List<String> {
+
+
+        //val recordings = mutableListOf<String>()
+
+        val files = minioClient.listObjects(
+            ListObjectsArgs.builder()
+                .bucket(bucketName)
+                .build()
+        )
+        /*for (item in files) {
+            val fileName = item.get().objectName()
+            if (fileName.contains(today)) {
+                recordings.add(fileName)
+            }
+        }*/
+        val recordingsForToday = files.filter { it.get().lastModified().toLocalDate().equals(LocalDate.now()) }
+            .map { it.get().objectName() }
+
+        return recordingsForToday
+    }
+
+    fun getAudioFile(filename: String): ByteArray {
+        val stream: InputStream = minioClient.getObject(
+            GetObjectArgs.builder()
+                .bucket(bucketName)
+                .`object`(filename)
+                .build()
+        )
+        return stream.readAllBytes()
+
     }
 }
 

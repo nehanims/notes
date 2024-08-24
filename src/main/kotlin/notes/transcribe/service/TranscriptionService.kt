@@ -64,7 +64,7 @@ class TranscriptionService(
 
     private val log = LoggerFactory.getLogger(javaClass)
 
-    fun downloadAndSendFileToEndpoint(fileName: String) : ResponseEntity<String> {
+    fun downloadAndSendFileToTranscriptionEndpoint(fileName: String) : ResponseEntity<String> {
 
 
         // Fetch the file from MinIO as InputStream
@@ -109,6 +109,6 @@ class TranscriptionService(
     }
 
     fun transcribe(fileName: String) : ResponseEntity<String> {
-        return downloadAndSendFileToEndpoint(fileName)
+        return downloadAndSendFileToTranscriptionEndpoint(fileName)
     }
 }
