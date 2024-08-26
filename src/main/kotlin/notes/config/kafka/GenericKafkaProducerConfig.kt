@@ -3,7 +3,7 @@ import org.apache.kafka.common.serialization.StringSerializer
 import org.springframework.kafka.core.DefaultKafkaProducerFactory
 import org.springframework.kafka.core.ProducerFactory
 import org.springframework.kafka.core.KafkaTemplate
-import kotlinx.serialization.KSerializer
+
 import notes.config.kafka.GenericSerializer
 
 inline fun <reified T> genericProducerFactory(): ProducerFactory<String, T> {

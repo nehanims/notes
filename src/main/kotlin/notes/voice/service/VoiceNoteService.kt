@@ -18,6 +18,8 @@ import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import java.io.InputStream
 import java.time.LocalDate
+import java.time.ZonedDateTime
+import java.time.temporal.ChronoUnit
 import java.util.concurrent.TimeUnit
 
 @Service
@@ -91,21 +93,16 @@ class VoiceNoteService (
 
     fun getTodaysRecordings(): List<String> {
 
-
-        //val recordings = mutableListOf<String>()
-
         val files = minioClient.listObjects(
             ListObjectsArgs.builder()
                 .bucket(bucketName)
                 .build()
         )
-        /*for (item in files) {
-            val fileName = item.get().objectName()
-            if (fileName.contains(today)) {
-                recordings.add(fileName)
-            }
-        }*/
-        val recordingsForToday = files.filter { it.get().lastModified().toLocalDate().equals(LocalDate.now()) }
+
+        val now = ZonedDateTime.now()
+        val cutoffTime = now.minus(24, ChronoUnit.HOURS)
+        val recordingsForToday = files.filter { it.get().lastModified().isAfter(cutoffTime) }
+            .filter { it.get().objectName().endsWith(".webm") }
             .map { it.get().objectName() }
 
         return recordingsForToday

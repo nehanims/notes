@@ -35,9 +35,9 @@ dependencies {
 	implementation("io.minio:minio:8.5.11")
 	implementation("org.springframework.kafka:spring-kafka")
 	implementation("org.reactivestreams:reactive-streams:1.0.4")//TODO: Check if this is how to add reactive streams or some BOM is needed
-	implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
-	//implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.5.0")
-	//implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:1.5.0")
+	implementation("org.springframework.boot:spring-boot-starter-websocket")
+	implementation("org.springframework.boot:spring-boot-starter-actuator")
+	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	compileOnly("org.projectlombok:lombok")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	runtimeOnly("com.h2database:h2")
