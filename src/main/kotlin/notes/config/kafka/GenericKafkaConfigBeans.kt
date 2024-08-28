@@ -1,12 +1,11 @@
 package notes.config.kafka
 
 import genericKafkaTemplate
-import notes.metrics.domain.Metric
-import notes.transcribe.domain.VoiceNoteTranscribed
+import notes.kafka.model.Metric
+import notes.kafka.model.VoiceNoteTranscribed
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.kafka.annotation.EnableKafka
-import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
 import org.springframework.kafka.core.KafkaTemplate
 
 @EnableKafka

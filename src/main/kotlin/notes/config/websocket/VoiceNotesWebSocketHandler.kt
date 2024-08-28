@@ -1,7 +1,7 @@
 package notes.config.websocket
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import notes.metrics.domain.Metric
+import notes.kafka.model.Metric
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import org.springframework.web.socket.CloseStatus

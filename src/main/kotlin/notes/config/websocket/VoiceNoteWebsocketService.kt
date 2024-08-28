@@ -1,6 +1,6 @@
 package notes.config.websocket
 
-import notes.transcribe.domain.VoiceNoteTranscribed
+import notes.kafka.model.VoiceNoteTranscribed
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service

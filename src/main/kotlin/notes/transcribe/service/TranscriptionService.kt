@@ -4,7 +4,8 @@ import io.minio.GetObjectArgs
 import io.minio.MinioClient
 import io.minio.PutObjectArgs
 import notes.transcribe.domain.Transcription
-import notes.transcribe.domain.VoiceNoteTranscribed
+import notes.kafka.model.VoiceNoteTranscribed
+import notes.kafka.model.VoiceNoteUploaded
 import notes.transcribe.repository.TranscriptionRepository
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -36,19 +37,19 @@ class TranscriptionService(
 
     //TODO read carefully and fix the return types etc for all these methods
 
-    fun transcribe(audioFileName: String): ResponseEntity<String> {
-        val transcribedText = downloadAndTranscribeAudioFile(audioFileName)
-        saveTranscription(audioFileName, transcribedText)
+    fun transcribe(voiceNoteUploaded: VoiceNoteUploaded): ResponseEntity<String> {
+        val transcribedText = downloadAndTranscribeAudioFile(voiceNoteUploaded)
+        saveTranscription(voiceNoteUploaded.fileName, transcribedText)//TODO: start refactoring from this point - you should be saving the voicenote id to the transcription not just the filename
         return ResponseEntity.ok(transcribedText)
     }
 
-    fun downloadAndTranscribeAudioFile(fileName: String): String? {
+    fun downloadAndTranscribeAudioFile(voiceNoteUploaded: VoiceNoteUploaded): String? {
 
         // Fetch the file from MinIO as InputStream
         val stream: InputStream = minioClient.getObject(
             GetObjectArgs.builder()
-                .bucket(minioBucketName)
-                .`object`(fileName)
+                .bucket(voiceNoteUploaded.bucketName)
+                .`object`(voiceNoteUploaded.fileName)
                 .build()
         )
 
@@ -58,7 +59,7 @@ class TranscriptionService(
         // Prepare the ByteArrayResource for the file
         val fileAsResource = object : ByteArrayResource(byteArray) {
             override fun getFilename(): String {
-                return fileName // Specify the filename
+                return voiceNoteUploaded.fileName // Specify the filename
             }
         }
 

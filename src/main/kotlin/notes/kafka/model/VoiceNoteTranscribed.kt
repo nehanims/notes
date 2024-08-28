@@ -1,4 +1,4 @@
-package notes.transcribe.domain
+package notes.kafka.model
 
 import com.fasterxml.jackson.annotation.JsonProperty
 

@@ -1,13 +1,11 @@
 package notes.voice.service
 
 import io.minio.*
-import io.minio.http.Method
 import notes.transcribe.service.TranscriptionService
-import notes.voice.domain.VoiceNoteUploaded
+import notes.kafka.model.VoiceNoteUploaded
 import notes.voice.domain.VoiceNote
 import notes.voice.repository.VoiceNoteRepository
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -18,34 +16,35 @@ import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import java.io.InputStream
-import java.time.LocalDate
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
-import java.util.concurrent.TimeUnit
 
 @Service
 class VoiceNoteService (
-    @Value("\${kafka.topics.voice-note}") val topic: String,
-    @Autowired
-    private val kafkaTemplate: KafkaTemplate<String, VoiceNoteUploaded>
+    private val transcriptionService: TranscriptionService,
+    private val repository: VoiceNoteRepository,
+    private val minioClient: MinioClient,
+    private val kafkaTemplate: KafkaTemplate<String, VoiceNoteUploaded>,
+    @Value("\${kafka.topics.voice-note}") private val topic: String,
+    @Value("\${minio.bucket-name}") private val bucketName: String
 ){
-    @Autowired
-    private lateinit var transcriptionService: TranscriptionService
     private val log = LoggerFactory.getLogger(javaClass)
-    //TODO should all these be constructor injected?
 
-    @Autowired
-    private lateinit var minioClient: MinioClient
-
-    @Autowired
-    private lateinit var repository: VoiceNoteRepository
-
-    @Value("\${minio.bucket-name}")
-    private lateinit var bucketName: String
-
-    fun uploadFile(file: MultipartFile, metadata: Map<String, String>): VoiceNote {
-        val filename = "${System.currentTimeMillis()}-${file.originalFilename}"
+    //TODO https://github.com/nehanims/notes/issues/38#issue-2492961136
+    fun processVoiceNote(file: MultipartFile): VoiceNote {
+        val filename = "voice-note-${System.currentTimeMillis()}-${file.originalFilename}"
         val inputStream: InputStream = file.inputStream
+        uploadToObjectStorage(filename, inputStream, file)
+        val savedVoiceNote = saveVoiceNoteToDatabase(filename)
+        produceKafkaMessage(savedVoiceNote)
+        return savedVoiceNote
+    }
+
+    private fun uploadToObjectStorage(
+        filename: String,
+        inputStream: InputStream,
+        file: MultipartFile
+    ) {
         minioClient.putObject(
             PutObjectArgs.builder()
                 .bucket(bucketName)
@@ -54,36 +53,30 @@ class VoiceNoteService (
                 .contentType(file.contentType)
                 .build()
         )
-        //TODO remove this URL from the entity it is useless
-        val fileUrl = minioClient.getPresignedObjectUrl( GetPresignedObjectUrlArgs.builder()
-            .method(Method.GET)
-            .bucket(bucketName)
-            .`object`(filename)
-            .expiry(7, TimeUnit.DAYS)
-            .build())
-
-        val voiceNote = VoiceNote(
-            filename = filename,
-            url = fileUrl,
-            length = metadata["length"]?.toLong() ?: 0,
-            encoding = metadata["encoding"] ?: "unknown",
-            channels = metadata["channels"]?.toInt() ?: 1,
-            title = metadata["title"]
-        )
-        repository.save(voiceNote)
-        //produceKafkaMessage(TestMessage("VoiceNote", voiceNote.url))//TODO  make sure all these operations are synchronous and transactional -- if any of the operations fail everything should be rolled back - BUT look more into whether that's the right approach, would you want partially commited state in the database if it is not written to kafka? or file uploaded if it fails to write to metadata store?
-        produceKafkaMessage(VoiceNoteUploaded("VoiceNote", voiceNote.filename))
-        return voiceNote
     }
 
-    fun produceKafkaMessage(voiceNoteUploaded: VoiceNoteUploaded): ResponseEntity<Any> {
+    private fun saveVoiceNoteToDatabase(filename:String): VoiceNote {
+        val voiceNote = VoiceNote(
+            fileName = filename,
+            bucketName = bucketName,
+        )
+        return repository.save(voiceNote)
+    }
+
+    private fun produceKafkaMessage(savedVoiceNote: VoiceNote): ResponseEntity<Any> {
+        val voiceNoteUploaded = VoiceNoteUploaded(
+            id = savedVoiceNote.id,
+            fileName = savedVoiceNote.fileName,
+            bucketName = savedVoiceNote.bucketName,
+            //created = ZonedDateTime.now()
+        )
         return try {
             log.info("Uploaded voice note")
             log.info("Sending message to Kafka {}", voiceNoteUploaded)
             val message: Message<VoiceNoteUploaded> = MessageBuilder
                 .withPayload(voiceNoteUploaded)
                 .setHeader(KafkaHeaders.TOPIC, topic)
-                .setHeader("X-Custom-Header", "Custom header here")
+                //.setHeader("X-Custom-Header", "Custom header here")
                 .build()
             kafkaTemplate.send(message)
             log.info("Message sent with success")
@@ -94,8 +87,7 @@ class VoiceNoteService (
         }
     }
 
-    fun getTodaysRecordings(): List<Pair<String,String>> {
-
+    fun getPast24HoursRecordings(): List<Pair<String,String>> {
         val files = minioClient.listObjects(
             ListObjectsArgs.builder()
                 .bucket(bucketName)

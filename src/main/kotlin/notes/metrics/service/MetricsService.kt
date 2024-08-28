@@ -2,12 +2,12 @@ package notes.metrics.service
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import notes.config.websocket.VoiceNotesWebSocketHandler
-import notes.metrics.domain.Metric
+import notes.kafka.model.Metric
 import notes.metrics.domain.MetricSource
 import notes.ollama.client.OllamaPromptService
 import notes.ollama.client.OllamaClient
 import notes.ollama.model.OllamaGenerateRequestBody
-import notes.transcribe.domain.VoiceNoteTranscribed
+import notes.kafka.model.VoiceNoteTranscribed
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.core.KafkaTemplate
@@ -25,7 +25,7 @@ class MetricsService(
     private val kafkaTemplate: KafkaTemplate<String, Metric>,
     @Value("\${kafka.topics.generated-metrics}") private val generatedMetricsTopic: String,
 
-) {
+    ) {
     val log = LoggerFactory.getLogger(javaClass)
     fun processTranscription(voiceNoteTanscribed: VoiceNoteTranscribed) {
         // send the transcription to rewrite service

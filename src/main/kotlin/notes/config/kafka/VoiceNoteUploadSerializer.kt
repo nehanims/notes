@@ -1,7 +1,7 @@
 package notes.config.kafka
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import notes.voice.domain.VoiceNoteUploaded
+import notes.kafka.model.VoiceNoteUploaded
 import org.apache.kafka.common.errors.SerializationException
 import org.apache.kafka.common.serialization.Serializer
 import org.slf4j.LoggerFactory

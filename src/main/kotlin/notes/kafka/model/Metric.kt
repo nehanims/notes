@@ -1,6 +1,7 @@
-package notes.metrics.domain
+package notes.kafka.model
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import notes.metrics.domain.MetricSource
 
 data class Metric (
     @JsonProperty("type")

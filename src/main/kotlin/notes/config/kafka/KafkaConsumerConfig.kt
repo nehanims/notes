@@ -1,7 +1,7 @@
 package notes.config.kafka
 
-import notes.transcribe.domain.VoiceNoteTranscribed
-import notes.voice.domain.VoiceNoteUploaded
+import notes.kafka.model.VoiceNoteTranscribed
+import notes.kafka.model.VoiceNoteUploaded
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.springframework.beans.factory.annotation.Value
@@ -12,21 +12,21 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
 import org.springframework.kafka.core.ConsumerFactory
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 import org.springframework.kafka.listener.ContainerProperties
-import org.springframework.kafka.support.serializer.JsonDeserializer
 
 
 @EnableKafka
 @Configuration
 class KafkaConsumerConfig(
-    @Value("\${kafka.bootstrap-address}")
-    private val servers: String
+    @Value("\${kafka.bootstrap-address}") private val servers: String,
+    @Value("\${kafka.consumer.group-id.voice-note}") private val voiceNoteConsumerGroupId: String,
+    @Value("\${kafka.consumer.group-id.transcription}") private val transcriptionConsumerGroupId: String
 ) {
 
     @Bean
     fun consumerFactory(): ConsumerFactory<String?, VoiceNoteUploaded?> {
         val props: MutableMap<String, Any> = HashMap()
         props[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] = servers
-        props[ConsumerConfig.GROUP_ID_CONFIG] = "ppr"
+        props[ConsumerConfig.GROUP_ID_CONFIG] = voiceNoteConsumerGroupId
         props[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
         props[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = VoiceNoteUploadDeserializer::class.java
         props[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "earliest"
@@ -46,7 +46,7 @@ class KafkaConsumerConfig(
     fun transcribedConsumerFactory(): ConsumerFactory<String?, VoiceNoteTranscribed?> {
         val props: MutableMap<String, Any> = HashMap()
         props[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] = servers
-        props[ConsumerConfig.GROUP_ID_CONFIG] = "transcribed-consumer"
+        props[ConsumerConfig.GROUP_ID_CONFIG] = transcriptionConsumerGroupId
         props[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
         props[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = VoiceNoteTranscribedDeserializer::class.java
         props[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "earliest"
