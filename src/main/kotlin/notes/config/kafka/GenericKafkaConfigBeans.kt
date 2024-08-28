@@ -1,6 +1,7 @@
 package notes.config.kafka
 
 import genericKafkaTemplate
+import notes.metrics.domain.Metric
 import notes.transcribe.domain.VoiceNoteTranscribed
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -16,14 +17,10 @@ class KafkaConfigVoiceNoteTranscribed
     fun voiceNotesTranscribedKafkaTemplate(): KafkaTemplate<String, VoiceNoteTranscribed> {
         return genericKafkaTemplate()
     }
-//
-//    @Bean
-//    fun voiceNotesTranscribedKafkaListenerContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, VoiceNoteTranscribed>? {
-//        return genericKafkaListenerContainerFactory()
-//    }
-//
-//    @Bean
-//    fun voiceNotesTranscribedDeserializerFactory(): GenericDeserializer<VoiceNoteTranscribed> {
-//        return GenericDeserializer(VoiceNoteTranscribed::class.java)
-//    }
+
+    @Bean
+    fun metricsKafkaTemplate(): KafkaTemplate<String, Metric> {
+        return genericKafkaTemplate()
+    }
+
 }

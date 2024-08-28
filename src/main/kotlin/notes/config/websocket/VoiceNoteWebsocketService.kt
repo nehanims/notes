@@ -10,20 +10,16 @@ import org.springframework.stereotype.Service
 @Service
 class VoiceNoteWebsocketService(
     @Autowired
-    private val transcriptionWebSocketHandler: TranscriptionWebSocketHandler
+    private val voiceNotesWebSocketHandler: VoiceNotesWebSocketHandler
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
     fun processTranscription(voiceNoteTranscribed: VoiceNoteTranscribed) {
-        val fileName = voiceNoteTranscribed.voiceNoteFilename
-
-        logger.info("***** Processing transcription for $fileName ")
-        // Simulate transcription process
-        // In a real scenario, this would be an asynchronous process
-        val transcription = voiceNoteTranscribed.transcribedText
+        val audioFilename = voiceNoteTranscribed.voiceNoteFilename
+        val transcribedFilename = voiceNoteTranscribed.transcribedFilename
 
         // Send the transcription update via WebSocket
 
-        transcriptionWebSocketHandler.sendTranscriptionUpdate(fileName, transcription)
+        voiceNotesWebSocketHandler.sendTranscriptionUpdate(audioFilename, transcribedFilename)
 
     }
 }

@@ -101,6 +101,7 @@ class TranscriptionService(
         return transcription
     }
 
+
     private fun publishTranscriptionToKafka(transcribedMessage: String?, transcription: Transcription) {
 
         val voiceNoteTranscribed = VoiceNoteTranscribed(
@@ -138,6 +139,24 @@ class TranscriptionService(
                 .build()
         )
         log.info("Uploaded string to MinIO")
+    }
+
+    fun getTranscriptionsForFiles(recordingsForToday: List<String>): List<Transcription> {
+        val transcriptions = repository.findAllByAudioFilenameIn(recordingsForToday)
+        log.info("Transcriptions: {}", transcriptions)
+        return transcriptions
+    }
+
+    fun getTranscription(filename: String): String {
+        val transcription = repository.findByTranscriptionFilename(filename)
+        val stream: InputStream = minioClient.getObject(
+            GetObjectArgs.builder()
+                .bucket(minioBucketName)
+                .`object`(transcription.transcriptionFilename)
+                .build()
+        )
+        return stream.bufferedReader().use { it.readText() }
+
     }
 
 

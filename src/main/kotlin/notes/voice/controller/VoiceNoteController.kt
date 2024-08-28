@@ -34,7 +34,7 @@ class VoiceNoteController {
 
 
     @GetMapping("/today")
-    fun getTodaysRecordings(): List<String> {
+    fun getTodaysRecordings(): List<Pair<String,String>> {
         return voiceNoteService.getTodaysRecordings()
     }
 

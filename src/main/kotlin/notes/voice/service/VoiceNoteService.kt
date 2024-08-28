@@ -2,6 +2,7 @@ package notes.voice.service
 
 import io.minio.*
 import io.minio.http.Method
+import notes.transcribe.service.TranscriptionService
 import notes.voice.domain.VoiceNoteUploaded
 import notes.voice.domain.VoiceNote
 import notes.voice.repository.VoiceNoteRepository
@@ -28,6 +29,8 @@ class VoiceNoteService (
     @Autowired
     private val kafkaTemplate: KafkaTemplate<String, VoiceNoteUploaded>
 ){
+    @Autowired
+    private lateinit var transcriptionService: TranscriptionService
     private val log = LoggerFactory.getLogger(javaClass)
     //TODO should all these be constructor injected?
 
@@ -91,7 +94,7 @@ class VoiceNoteService (
         }
     }
 
-    fun getTodaysRecordings(): List<String> {
+    fun getTodaysRecordings(): List<Pair<String,String>> {
 
         val files = minioClient.listObjects(
             ListObjectsArgs.builder()
@@ -105,7 +108,9 @@ class VoiceNoteService (
             .filter { it.get().objectName().endsWith(".webm") }
             .map { it.get().objectName() }
 
-        return recordingsForToday
+        val transcriptions= transcriptionService.getTranscriptionsForFiles(recordingsForToday)
+
+        return transcriptions.map { it.audioFilename to it.transcriptionFilename }
     }
 
     fun getAudioFile(filename: String): ByteArray {
