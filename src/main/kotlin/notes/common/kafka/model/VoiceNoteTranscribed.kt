@@ -1,4 +1,4 @@
-package notes.kafka.model
+package notes.common.kafka.model
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
@@ -9,7 +9,9 @@ data class VoiceNoteTranscribed (
     val transcribedFilename: String,
     @JsonProperty("transcribedText")
     val transcribedText: String,
-    @JsonProperty("voiceNoteUrl")
-    val voiceNoteFilename: String?
+    @JsonProperty("voiceNoteId")
+    val voiceNoteId: Long,
+    @JsonProperty("voiceNoteFilename")
+    val voiceNoteFilename:String
 
 )

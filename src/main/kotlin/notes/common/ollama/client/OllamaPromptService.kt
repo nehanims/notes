@@ -1,4 +1,4 @@
-package notes.ollama.client
+package notes.common.ollama.client
 
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -17,7 +17,7 @@ class OllamaPromptService {
     }
 
     private fun getEntityList(): String {
-        return "medication, symptom, medical procedure, therapeutic intervention, activity, diet, dietary supplement, appointment"
+        return "medication, symptom, medical procedure, therapeutic intervention, activity, diet, ingested beverages, dietary supplement, appointment"
     }
 
     fun getRewritePrompt(textToRewrite: String) =

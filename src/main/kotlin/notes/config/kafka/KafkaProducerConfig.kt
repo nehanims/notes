@@ -1,6 +1,6 @@
 package notes.config.kafka
 
-import notes.kafka.model.VoiceNoteUploaded
+import notes.common.kafka.model.VoiceNoteUploaded
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.serialization.StringSerializer
 import org.springframework.beans.factory.annotation.Value

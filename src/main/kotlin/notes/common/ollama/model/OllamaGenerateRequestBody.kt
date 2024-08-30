@@ -1,4 +1,4 @@
-package notes.ollama.model
+package notes.common.ollama.model
 
 /**
  * ollama API

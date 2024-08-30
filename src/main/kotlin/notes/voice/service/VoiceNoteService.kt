@@ -2,7 +2,7 @@ package notes.voice.service
 
 import io.minio.*
 import notes.transcribe.service.TranscriptionService
-import notes.kafka.model.VoiceNoteUploaded
+import notes.common.kafka.model.VoiceNoteUploaded
 import notes.voice.domain.VoiceNote
 import notes.voice.repository.VoiceNoteRepository
 import org.slf4j.LoggerFactory
@@ -25,7 +25,7 @@ class VoiceNoteService (
     private val repository: VoiceNoteRepository,
     private val minioClient: MinioClient,
     private val kafkaTemplate: KafkaTemplate<String, VoiceNoteUploaded>,
-    @Value("\${kafka.topics.voice-note}") private val topic: String,
+    @Value("\${kafka.topics.voice-note-upload}") private val topic: String,
     @Value("\${minio.bucket-name}") private val bucketName: String
 ){
     private val log = LoggerFactory.getLogger(javaClass)
@@ -87,6 +87,7 @@ class VoiceNoteService (
         }
     }
 
+    //TODO get it based on the metadata instead of the object store
     fun getPast24HoursRecordings(): List<Pair<String,String>> {
         val files = minioClient.listObjects(
             ListObjectsArgs.builder()

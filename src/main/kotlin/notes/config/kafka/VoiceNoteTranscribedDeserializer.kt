@@ -2,7 +2,7 @@ package notes.config.kafka
 
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import notes.kafka.model.VoiceNoteTranscribed
+import notes.common.kafka.model.VoiceNoteTranscribed
 
 import org.apache.kafka.common.errors.SerializationException
 import org.apache.kafka.common.serialization.Deserializer

@@ -1,6 +1,6 @@
 package notes.voice
 
-import notes.ollama.client.OllamaClient
+import notes.common.ollama.client.OllamaClient
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
 import com.fasterxml.jackson.databind.ObjectMapper;

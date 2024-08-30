@@ -15,6 +15,7 @@ class Transcription (
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0,
     val transcriptionFilename: String,
+    val voiceNoteId: Long,
     @Column(length = 1024)
     val audioFilename: String,
     val timestamp: LocalDateTime = LocalDateTime.now()//TODO: Change to ZonedDateTime?

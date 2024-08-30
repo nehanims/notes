@@ -1,4 +1,4 @@
-package notes.config.websocket
+package notes.common.websocket
 
 
 data class TranscriptionMessage(val type: String = "transcription",

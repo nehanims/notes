@@ -1,11 +1,10 @@
 package notes.metrics.consumer
 
-import notes.config.websocket.VoiceNoteWebsocketService
+import notes.common.websocket.VoiceNoteWebsocketService
 import notes.metrics.service.MetricsService
-import notes.kafka.model.VoiceNoteTranscribed
+import notes.common.kafka.model.VoiceNoteTranscribed
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Component
@@ -21,17 +20,17 @@ class NotesConsumer(private val wsService: VoiceNoteWebsocketService,
         groupId = "\${kafka.consumer.group-id.transcription}",
         containerFactory = "kafkaTranscribedListenerContainerFactory"
     )
-    fun listenGroupVoiceNoteTranscribed
-                (voiceNoteTranscribedConsumerRecord: ConsumerRecord<Any, VoiceNoteTranscribed>, ack: Acknowledgment) {
-        sendTranscriptionToWebsocketClients(voiceNoteTranscribedConsumerRecord)
+    fun listenGroupVoiceNoteTranscribed(
+        voiceNoteTranscribedConsumerRecord: ConsumerRecord<Any, VoiceNoteTranscribed>,
+        ack: Acknowledgment) {
+        logger.info("Message received {}", voiceNoteTranscribedConsumerRecord)
+        //Send the transcription update via WebSocket
+        wsService.processTranscription(voiceNoteTranscribedConsumerRecord.value())
+        // extract metrics from the transcribed text
         metricsService.processTranscription(voiceNoteTranscribedConsumerRecord.value())
-        //TODO: https://github.com/nehanims/notes/issues/38#issuecomment-2316294879
+
         ack.acknowledge()
     }
 
-    private fun sendTranscriptionToWebsocketClients(voiceNoteTranscribedConsumerRecord: ConsumerRecord<Any, VoiceNoteTranscribed>) {
-        logger.info("Message received key {}", voiceNoteTranscribedConsumerRecord.key())
-        logger.info("Message received value {}", voiceNoteTranscribedConsumerRecord.value())
-        voiceNoteTranscribedConsumerRecord.value()?.let { wsService.processTranscription(it) }
-    }
+
 }

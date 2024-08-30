@@ -1,13 +1,15 @@
 package notes.metrics.service
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import notes.config.websocket.VoiceNotesWebSocketHandler
-import notes.kafka.model.Metric
+import notes.common.websocket.VoiceNotesWebSocketHandler
+import notes.common.kafka.model.MetricDTO
 import notes.metrics.domain.MetricSource
-import notes.ollama.client.OllamaPromptService
-import notes.ollama.client.OllamaClient
-import notes.ollama.model.OllamaGenerateRequestBody
-import notes.kafka.model.VoiceNoteTranscribed
+
+import notes.common.kafka.model.VoiceNoteTranscribed
+import notes.common.ollama.model.OllamaGenerateRequestBody
+import notes.metrics.domain.Metric
+import notes.metrics.domain.MetricApprovalStatus
+import notes.metrics.repository.MetricRepository
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.core.KafkaTemplate
@@ -15,14 +17,16 @@ import org.springframework.kafka.support.KafkaHeaders
 import org.springframework.messaging.Message
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
 
 class MetricsService(
-    private val ollamaClient: OllamaClient,
-    private val ollamaPromptService: OllamaPromptService,
+    private val generatedMetricRepository: MetricRepository,
+    private val ollamaClient: notes.common.ollama.client.OllamaClient,
+    private val ollamaPromptService: notes.common.ollama.client.OllamaPromptService,
     private val voiceNotesWebSocketHandler: VoiceNotesWebSocketHandler,
-    private val kafkaTemplate: KafkaTemplate<String, Metric>,
+    private val kafkaTemplate: KafkaTemplate<String, MetricDTO>,
     @Value("\${kafka.topics.generated-metrics}") private val generatedMetricsTopic: String,
 
     ) {
@@ -35,19 +39,55 @@ class MetricsService(
         log.info("Original transcription: $original")
         log.info("Rewritten transcription: $rewritten")
 
-        val metrics = getMetrics(original, MetricSource.ORIGINAL_TRANSCRIPT,
+        // extract metrics from the transcribed text
+        val parsedMetrics = getMetrics(original, MetricSource.ORIGINAL_TRANSCRIPT,
             voiceNoteTanscribed,
             rewritten)
-        log.info("Metrics: $metrics")
+        log.info("Parsed Metrics: $parsedMetrics")
+
+        // save the metrics to the database
+        val generatedMetrics = parsedMetrics.map{
+            Metric(
+                type=it.type,
+                summary=it.summary,
+                approvalStatus=MetricApprovalStatus.PENDING,
+                llm=ollamaPromptService.getModelForMetricExtraction(),
+                source = MetricSource.ORIGINAL_TRANSCRIPT,
+                transcribedFileId = voiceNoteTanscribed.id,
+                transcribedFilename = voiceNoteTanscribed.transcribedFilename,
+                voiceNoteId = voiceNoteTanscribed.voiceNoteId,
+                voiceNoteFilename = voiceNoteTanscribed.voiceNoteFilename
+            )
+        }
+        val savedMetrics=generatedMetricRepository.saveAll(generatedMetrics)
+        log.info("Saved Generated Metrics: $savedMetrics")
+
+        // publish the metrics to kafka
+        val metrics = savedMetrics.stream()
+            .map {
+                MetricDTO(
+                    id = it.id,//Generate UUID
+                    type = it.type,
+                    summary = it.summary,
+                    approvalStatus = it.approvalStatus,
+                    llm = it.llm,
+                    source = it.source,
+                    transcribedFileId = it.transcribedFileId,
+                    transcribedFilename = it.transcribedFilename,
+                    voiceNoteId = it.voiceNoteId,
+                    voiceNoteFilename = it.voiceNoteFilename
+                )
+            }.toList()
+        publishMetricsToKafka(metrics)
+
+        // send the metrics to the websocket
+        sendToWebsocket(voiceNoteTanscribed.voiceNoteFilename, metrics)
+
+        //TODO: publish metrics for rewritten text also
         val rewrittenMetrics = getMetrics(rewritten, MetricSource.REWRITTEN_TRANSCRIPT,
             voiceNoteTanscribed,
             "N/A - this is the rewritten text")
         log.info("Rewritten Metrics: $rewrittenMetrics")
-
-        publishMetricsToKafka(metrics)
-        sendToWebsocket(voiceNoteTanscribed.voiceNoteFilename?:"", metrics)
-
-        //TODO: publish metrics for rewritten text also
 
     }
 
@@ -65,7 +105,7 @@ class MetricsService(
     private fun getMetrics(text:String,
                            source: MetricSource,
                            voiceNoteTanscribed: VoiceNoteTranscribed,
-                           transcribedTextRewrite:String): List<Metric> {
+                           transcribedTextRewrite:String): List<MetricDTO> {
         val ollamaMetricsTextResponse = getMetricsTextFromOllama(text)
         log.info("Metrics text from Ollama: $ollamaMetricsTextResponse")
         return parseMetrics(ollamaMetricsTextResponse, source, voiceNoteTanscribed, transcribedTextRewrite)
@@ -86,7 +126,7 @@ class MetricsService(
     fun parseMetrics(jsonString: String,
                      source: MetricSource,
                      voiceNoteTanscribed: VoiceNoteTranscribed,
-                     transcribedTextRewrite:String): List<Metric> {
+                     transcribedTextRewrite:String): List<MetricDTO> {
         return try {
             val cleanedJson = jsonString.trim()
                 .removePrefix("```json")
@@ -94,40 +134,31 @@ class MetricsService(
                 .trim()
 
             val objectMapper = jacksonObjectMapper()
-            objectMapper.readValue(cleanedJson, Array<Metric>::class.java)
+            return objectMapper.readValue(cleanedJson, Array<MetricDTO>::class.java)
                 .toList()
-                .map{
-                    Metric(type=it.type,
-                        summary=it.summary,
-                        llm=ollamaPromptService.getModelForMetricExtraction(),
-                        source = source,
-                        transcribedText=voiceNoteTanscribed.transcribedText,
-                        transcribedTextRewrite=transcribedTextRewrite,
-                        transcribedFilename = voiceNoteTanscribed.transcribedFilename,
-                        voiceNoteFilename = voiceNoteTanscribed.voiceNoteFilename?:"")
-                }
+
         } catch (e: Exception) {
             println("Error parsing JSON: ${e.message}")
-            emptyList()
+            return emptyList()
         }
     }
 
-    private fun publishMetricsToKafka(metrics: List<Metric>) {
+    private fun publishMetricsToKafka(metrics: List<MetricDTO>) {
 
         metrics.forEach() {
             log.info("Sending metric to Kafka {}", it)
-            val message: Message<Metric> = MessageBuilder
+            val message: Message<MetricDTO> = MessageBuilder
                 .withPayload(it)
                 .setHeader(KafkaHeaders.TOPIC, generatedMetricsTopic)
-                .setHeader("X-Custom-Header", "Custom header here")
+                //.setHeader("X-Custom-Header", "Custom header here")
                 .build()
             kafkaTemplate.send(message)
             log.info("Message sent with success")
         }
     }
 
-    private fun sendToWebsocket(audioFilename: String, metrics: List<Metric>) {
-        voiceNotesWebSocketHandler.sendMetricsUpdate(audioFilename, metrics)
+    private fun sendToWebsocket(voiceNoteFilename:String, metrics: List<MetricDTO>) {
+        voiceNotesWebSocketHandler.sendMetricsUpdate(voiceNoteFilename, metrics)
     }
 
 }

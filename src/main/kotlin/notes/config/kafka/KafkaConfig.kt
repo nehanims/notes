@@ -12,7 +12,7 @@ import org.springframework.kafka.core.KafkaAdmin
 class KafkaConfig(
     @Value("\${kafka.bootstrap-address}")
     private val servers: String,
-    @Value("\${kafka.topics.voice-note}")
+    @Value("\${kafka.topics.voice-note-upload}")
     private val voiceNoteUploadedTopic: String,
     @Value("\${kafka.topics.voice-note-transcription}")
     private val voiceNoteTranscribedTopic: String

@@ -1,7 +1,6 @@
-package notes.kafka.model
+package notes.common.kafka.model
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import java.time.ZonedDateTime
 
 data class VoiceNoteUploaded (
     @JsonProperty("id")

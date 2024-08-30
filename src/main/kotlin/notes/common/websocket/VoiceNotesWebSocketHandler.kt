@@ -1,7 +1,7 @@
-package notes.config.websocket
+package notes.common.websocket
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import notes.kafka.model.Metric
+import notes.common.kafka.model.MetricDTO
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import org.springframework.web.socket.CloseStatus
@@ -39,7 +39,7 @@ class VoiceNotesWebSocketHandler : TextWebSocketHandler() {
         }
     }
 
-    fun sendMetricsUpdate(audioFilename: String, metrics: List<Metric>) {
+    fun sendMetricsUpdate(audioFilename: String, metrics: List<MetricDTO>) {
         val metricsMessage = MetricsMessage(metrics = metrics, audioFilename = audioFilename)
         val jsonMessage = objectMapper.writeValueAsString(metricsMessage)
         sessions.forEach {

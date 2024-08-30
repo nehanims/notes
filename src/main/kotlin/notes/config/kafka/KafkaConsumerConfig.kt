@@ -1,7 +1,7 @@
 package notes.config.kafka
 
-import notes.kafka.model.VoiceNoteTranscribed
-import notes.kafka.model.VoiceNoteUploaded
+import notes.common.kafka.model.VoiceNoteTranscribed
+import notes.common.kafka.model.VoiceNoteUploaded
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.springframework.beans.factory.annotation.Value
