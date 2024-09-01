@@ -31,7 +31,7 @@ class GeneratedMetricsService(val repository: MetricRepository) {
         return repository.save(rejectedMetric)
     }
 
-    fun getMetricsByTranscriptionFilename(transcriptionFilename: String): List<Metric> {
+    fun getMetricsByTranscribedFilename(transcriptionFilename: String): List<Metric> {
         return repository.findByTranscribedFilename(transcriptionFilename)
 
     }

@@ -81,7 +81,7 @@ class MetricsService(
         publishMetricsToKafka(metrics)
 
         // send the metrics to the websocket
-        sendToWebsocket(voiceNoteTanscribed.voiceNoteFilename, metrics)
+        sendToWebsocket(voiceNoteTanscribed.transcribedFilename, metrics)
 
         //TODO: publish metrics for rewritten text also
         val rewrittenMetrics = getMetrics(rewritten, MetricSource.REWRITTEN_TRANSCRIPT,
@@ -157,8 +157,8 @@ class MetricsService(
         }
     }
 
-    private fun sendToWebsocket(voiceNoteFilename:String, metrics: List<MetricDTO>) {
-        voiceNotesWebSocketHandler.sendMetricsUpdate(voiceNoteFilename, metrics)
+    private fun sendToWebsocket(transcriptionFilename:String, metrics: List<MetricDTO>) {
+        voiceNotesWebSocketHandler.sendMetricsUpdate(transcriptionFilename, metrics)
     }
 
 }

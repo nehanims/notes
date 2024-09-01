@@ -1,4 +1,4 @@
-package notes.transcribe.consumer
+package notes.transcribe.controller
 
 import notes.transcribe.service.TranscriptionService
 import org.springframework.beans.factory.annotation.Autowired

@@ -11,6 +11,7 @@ class Metric (
     val summary: String,
     @Enumerated(EnumType.STRING)
     val approvalStatus: MetricApprovalStatus,
+
     val source: MetricSource?,
     val llm: String?,
     val transcribedFileId: Long,//TODO FK constraint? Or no?

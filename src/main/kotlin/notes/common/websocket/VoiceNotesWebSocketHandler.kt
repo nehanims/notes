@@ -39,8 +39,11 @@ class VoiceNotesWebSocketHandler : TextWebSocketHandler() {
         }
     }
 
-    fun sendMetricsUpdate(audioFilename: String, metrics: List<MetricDTO>) {
-        val metricsMessage = MetricsMessage(metrics = metrics, audioFilename = audioFilename)
+    fun sendMetricsUpdate(transcriptionFilename: String, metrics: List<MetricDTO>) {
+        if (metrics.isEmpty())
+            return
+
+        val metricsMessage = MetricsMessage(metrics = metrics, transcriptionFilename = transcriptionFilename, audioFilename=metrics[0].voiceNoteFilename?:"audio_filename_missing")//TODO throw exception if voiceNoteFilename is missing
         val jsonMessage = objectMapper.writeValueAsString(metricsMessage)
         sessions.forEach {
             try {
