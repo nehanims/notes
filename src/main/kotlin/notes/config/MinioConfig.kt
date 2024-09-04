@@ -1,4 +1,4 @@
-package notes.voice.config
+package notes.config
 
 // MinioConfig.kt
 import io.minio.MinioClient

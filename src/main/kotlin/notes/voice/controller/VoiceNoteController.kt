@@ -1,31 +1,30 @@
 package notes.voice.controller
 
+import notes.voice.domain.VoiceNote
 import notes.voice.service.VoiceNoteService
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 
 @RestController
-@RequestMapping("/upload")
-class VoiceNoteController {
+@RequestMapping("/api/voice-notes")
+class VoiceNoteController(private var voiceNoteService: VoiceNoteService) {
 
-    @Autowired
-    private lateinit var voiceNoteService: VoiceNoteService
-
-    @PostMapping("/audio")
+    @PostMapping("/upload")
+    @ResponseBody
     fun uploadAudioFile(
-        @RequestParam("audio") file: MultipartFile,
-        @RequestParam("length") length: String,
-        @RequestParam("encoding") encoding: String,
-        @RequestParam("channels") channels: String,
-        @RequestParam("title", required = false) title: String
-    ): String {
-        val metadata = mapOf(
-            "length" to length,
-            "encoding" to encoding,
-            "channels" to channels,
-            "title" to title
-        )
-        return voiceNoteService.uploadFile(file, metadata)
+        @RequestParam("audio") file: MultipartFile
+    ): VoiceNote {
+        return voiceNoteService.processVoiceNote(file)
     }
+
+    @GetMapping("/today")
+    fun getTodayRecordings(): List<Pair<String,String>> {
+        return voiceNoteService.getPast24HoursRecordings()
+    }
+
+    @GetMapping("/audio/{filename}")
+    fun getAudioFile(@PathVariable filename: String): ByteArray {
+        return voiceNoteService.getAudioFile(filename)
+    }
+
 }

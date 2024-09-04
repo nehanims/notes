@@ -38,3 +38,5 @@ out/
 
 ### Kotlin ###
 .kotlin
+/data/voice-notes-db.mv.db
+/data/voice-notes-db.trace.db

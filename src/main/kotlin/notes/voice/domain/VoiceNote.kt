@@ -7,17 +7,14 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import java.time.LocalDateTime
+import java.time.ZonedDateTime
 
 @Entity
 class VoiceNote(
         @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
         val id: Long = 0,
-        val filename: String,
-        @Column(length = 1024)
-        val url: String,
-        val length: Long, // length in milliseconds
-        val encoding: String,
-        val channels: Int,
+        val fileName: String,
+        val bucketName: String,
         val title: String? = null,
-        val timestamp: LocalDateTime = LocalDateTime.now()
+        val created: ZonedDateTime = ZonedDateTime.now()
 )
