@@ -1,7 +1,7 @@
 # Intelligent Chat Assistant
 
 ## Overview
-The Intelligent Chat Assistant is a sophisticated, locally-hosted voice chat application with advanced analytics capabilities. It leverages cutting-edge AI technologies to provide a powerful, customizable chat experience with voice recognition and metric extraction features.
+The Intelligent Chat Assistant is a sophisticated, fully locally-hosted voice chat application with analytics capabilities. It leverages generative AI technologies to provide a notetaking chatbot assistant that extracts metrics of relevance from conversations.
 
 ## Features
 
