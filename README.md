@@ -25,8 +25,8 @@ The Intelligent Chat Assistant is a sophisticated, fully locally-hosted voice ch
 - Intuitive and responsive frontend interface
 
 ### Analytics and Insights
-- Advanced analytics for extracting key metrics from conversations
-- Valuable insights from user interactions for tracking specific information
+- Analytics for extracting key metrics from conversations
+- Insights from user interactions for tracking specific information
 
 ### DevOps and Deployment
 - Dockerized components including transcription services, Kafka clusters, and object storage
