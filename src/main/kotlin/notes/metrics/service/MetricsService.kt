@@ -34,10 +34,11 @@ class MetricsService(
     fun processTranscription(voiceNoteTanscribed: VoiceNoteTranscribed) {
         // send the transcription to rewrite service
         val original = voiceNoteTanscribed.transcribedText
-        val rewritten = rewriteTranscription(original)
+        //val rewritten = rewriteTranscription(original)
+        val rewritten = "Commented out for now"
         // send the rewritten and original transcription to metrics service(experimental feature for comparison)
         log.info("Original transcription: $original")
-        log.info("Rewritten transcription: $rewritten")
+        //log.info("Rewritten transcription: $rewritten")
 
         // extract metrics from the transcribed text
         val parsedMetrics = getMetrics(original, MetricSource.ORIGINAL_TRANSCRIPT,
@@ -84,10 +85,12 @@ class MetricsService(
         sendToWebsocket(voiceNoteTanscribed.transcribedFilename, metrics)
 
         //TODO: publish metrics for rewritten text also
-        val rewrittenMetrics = getMetrics(rewritten, MetricSource.REWRITTEN_TRANSCRIPT,
+        /*val rewrittenMetrics = getMetrics(rewritten, MetricSource.REWRITTEN_TRANSCRIPT,
             voiceNoteTanscribed,
             "N/A - this is the rewritten text")
         log.info("Rewritten Metrics: $rewrittenMetrics")
+
+         */
 
     }
 

@@ -47,7 +47,8 @@ class VoiceNotesWebSocketHandler : TextWebSocketHandler() {
         val jsonMessage = objectMapper.writeValueAsString(metricsMessage)
         sessions.forEach {
             try {
-                if(it.isOpen) it.sendMessage(TextMessage(jsonMessage))
+                if(it!=null && it.isOpen()) it.sendMessage(TextMessage(jsonMessage))
+                else log.error("Session is null or closed")
             } catch (e: Exception) {
                 log.error("Error sending metrics update", e)
                 //sessions.remove(it) TODO: handle this
