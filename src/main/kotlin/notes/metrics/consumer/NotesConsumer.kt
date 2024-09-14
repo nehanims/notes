@@ -24,7 +24,7 @@ class NotesConsumer(private val wsService: VoiceNoteWebsocketService,
         voiceNoteTranscribedConsumerRecord: ConsumerRecord<Any, VoiceNoteTranscribed>,
         ack: Acknowledgment) {
         logger.info("Message received {}", voiceNoteTranscribedConsumerRecord)
-        //Send the transcription update via WebSocket
+        // Send the transcription update via WebSocket
         wsService.processTranscription(voiceNoteTranscribedConsumerRecord.value())
         // extract metrics from the transcribed text
         metricsService.processTranscription(voiceNoteTranscribedConsumerRecord.value())

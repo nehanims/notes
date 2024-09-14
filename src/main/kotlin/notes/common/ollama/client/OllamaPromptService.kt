@@ -1,10 +1,12 @@
 package notes.common.ollama.client
 
+import notes.common.auth.AuthService
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 
 @Service
-class OllamaPromptService {
+class OllamaPromptService(@Autowired private val authService: AuthService) {
 
     fun getMetricPrompt(transcribedText:String): String {
         val time=LocalDateTime.now().toString()
@@ -17,7 +19,7 @@ class OllamaPromptService {
     }
 
     private fun getEntityList(): String {
-        return "medication, symptom, medical procedure, therapeutic intervention, activity, diet, ingested beverages, dietary supplement, appointment"
+        return "PERSON, MEDICATION, SYMPTOM, MEDICAL PROCEDURE, THERAPEUTIC INTERVENTION, ACTIVITY, DIET, INGESTED BEVERAGES, DIETARY SUPPLEMENT, APPOINTMENT"
     }
 
     fun getRewritePrompt(textToRewrite: String) =
@@ -28,6 +30,133 @@ class OllamaPromptService {
 
     fun getModelForMetricExtraction() =
         "llama3"//TODO: make the model configurable
+
+
+    fun getModelForMetricExtractionUsingNER() =
+        //"sciphi/triplex"
+        "llama3"
+
+    private fun getEntitiesForNER(): String {
+        return "PERSON, MEDICATION, SYMPTOM, MEDICAL PROCEDURE, THERAPEUTIC INTERVENTION, ACTIVITY, DIET, INGESTED BEVERAGES, DIETARY SUPPLEMENT, APPOINTMENT"
+    }
+    private fun getPredicates(): List<String> {
+        return listOf("has_symptom", "took_medication", "did_activity", "ate", "drank", "took_supplement", "has_appointment")
+    }
+
+    fun getMetricPromptForNER(transcribedText: String): String {
+        val time=LocalDateTime.now().toString()
+        val entityTypes = getEntitiesForNER()
+        val predicates = getPredicates()
+        val username=authService.getUsername()
+        return """
+        Perform Named Entity Recognition (NER) and extract knowledge graph triplets from the text in backticks. 
+        NER identifies named entities of given entity types, and triple extraction identifies relationships between entities using specified predicates. 
+        Replace any first person pronouns with the name of the user {$username}.
+        Your response should be 2 JSON lists:
+        1) a list of entities as JSON objects, where each object contains the following keys: "entity_type", "value". 
+        The entity_type is the type of entity being referred to: {$entityTypes}, and the value is the specific entity identified in the text. 
+        2) a list of triplets as JSON objects, where each object contains the following keys: "subject", "predicate", "object". 
+        The subject is the value of the subject entity, the object is the value of the object entity and the predicate is the relationship between the subject and the object entities, one of: {$predicates}
+
+        **Entity Types:**
+        {$entityTypes}
+
+        **Predicates:**
+        {$predicates}
+
+        **Text:**
+        ```$transcribedText```
+        
+        Do not include any other text in your response other than the 2 JSON lists.
+        
+        e.g.
+        
+        **Text:**
+        ```Yesterday I ate eggs and steak for dinner. I had green tea and spice tea today. I ran on the treadmill for 30 minutes. I had blood drawn yesterday. I vacuumed and mopped the floor in the kitchen at the dining room yesterday.```
+        
+        **Expected Response:**
+        
+        ```[
+          [
+             {
+               "entity_type": "PERSON",
+               "value": "Neha"
+             },
+             {
+               "entity_type": "DIET",
+               "value": "eggs"
+             },
+             {
+               "entity_type": "DIET",
+               "value": "steak"
+             },
+             {
+               "entity_type": "INGESTED BEVERAGES",
+               "value": "green tea"
+             },
+             {
+               "entity_type": "INGESTED BEVERAGES",
+               "value": "spice tea"
+             },
+             {
+               "entity_type": "ACTIVITY",
+               "value": "ran on the treadmill"
+             },
+             {
+               "entity_type": "MEDICAL PROCEDURE",
+               "value": "blood drawn"
+             },
+             {
+               "entity_type": "ACTIVITY",
+               "value": "vacuumed"
+             },
+             {
+               "entity_type": "ACTIVITY",
+               "value": "mopped the floor"
+             }
+           ], 
+           [
+             {
+               "subject": "Neha",
+               "predicate": "ate",
+               "object": "eggs"
+             },
+             {
+               "subject": "Neha",
+               "predicate": "ate",
+               "object": "steak"
+             },
+             {
+               "subject": "Neha",
+               "predicate": "drank",
+               "object": "green tea"
+             },
+             {
+               "subject": "Neha",
+               "predicate": "drank",
+               "object": "spice tea"
+             },
+             {
+               "subject": "Neha",
+               "predicate": "did_activity",
+               "object": "ran on the treadmill"
+             },
+             {
+               "subject": "Neha",
+               "predicate": "did_activity",
+               "object": "vacuumed"
+             },
+             {
+               "subject": "Neha",
+               "predicate": "did_activity",
+               "object": "mopped the floor"
+             }
+           ]
+        ]
+        ```
+        """.trimIndent()
+    }
+
 }
 //TODO give examples of the expected JSON response, take a few examples from Claude and show how the JSON should look. so that hte examples don't become too complex, maybe identify different metrics in different prompts
 //Prompts

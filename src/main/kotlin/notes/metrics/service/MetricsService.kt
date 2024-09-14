@@ -46,6 +46,8 @@ class MetricsService(
             rewritten)
         log.info("Parsed Metrics: $parsedMetrics")
 
+
+
         // save the metrics to the database
         val generatedMetrics = parsedMetrics.map{
             Metric(
@@ -83,6 +85,9 @@ class MetricsService(
 
         // send the metrics to the websocket
         sendToWebsocket(voiceNoteTanscribed.transcribedFilename, metrics)
+
+        val nerRelations= getMetricsTextFromOllamaUsingNER(original)
+        log.info("NER Relations: $nerRelations")
 
         //TODO: publish metrics for rewritten text also
         /*val rewrittenMetrics = getMetrics(rewritten, MetricSource.REWRITTEN_TRANSCRIPT,
@@ -125,6 +130,20 @@ class MetricsService(
             )
         ).response
     }
+
+    private fun getMetricsTextFromOllamaUsingNER(transcribedText: String): String {
+
+        val prompt = ollamaPromptService.getMetricPromptForNER(transcribedText)
+        return ollamaClient.generate(
+            OllamaGenerateRequestBody(
+                model = ollamaPromptService.getModelForMetricExtractionUsingNER(),
+                prompt = prompt,
+                stream = false
+            )
+        ).response
+    }
+
+
 
     fun parseMetrics(jsonString: String,
                      source: MetricSource,
