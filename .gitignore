@@ -1,16 +1,16 @@
 HELP.md
 .gradle
-build/
+notes.common.pubtator3.reference.swagger.client.build/
 !gradle/wrapper/gradle-wrapper.jar
-!**/src/main/**/build/
-!**/src/test/**/build/
+!**/src/main/**/notes.common.pubtator3.reference.swagger.client.build/
+!**/src/test/**/notes.common.pubtator3.reference.swagger.client.build/
 
 ### STS ###
 .apt_generated
 .classpath
 .factorypath
 .project
-.settings
+.notes.common.pubtator3.reference.swagger.client.settings
 .springBeans
 .sts4-cache
 bin/

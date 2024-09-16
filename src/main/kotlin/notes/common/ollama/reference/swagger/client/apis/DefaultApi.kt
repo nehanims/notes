@@ -18,14 +18,22 @@ import io.swagger.client.models.ApiGenerateBody
 import io.swagger.client.models.ApiPullBody
 import io.swagger.client.models.ApiPushBody
 import io.swagger.client.models.ApiShowBody
-import io.swagger.client.models.InlineResponse200
-import io.swagger.client.models.InlineResponse2001
-import io.swagger.client.models.InlineResponse2002
+import notes.common.pubtator3.reference.client.models.InlineResponse200
+import notes.common.pubtator3.reference.client.models.InlineResponse2001
+import notes.common.pubtator3.reference.client.models.InlineResponse2002
 import io.swagger.client.models.InlineResponse2003
 import io.swagger.client.models.InlineResponse2004
 import io.swagger.client.models.InlineResponse2005
 
 import io.swagger.client.infrastructure.*
+import notes.common.pubtator3.reference.client.infrastructure.ApiClient
+import notes.common.pubtator3.reference.client.infrastructure.ClientError
+import notes.common.pubtator3.reference.client.infrastructure.ClientException
+import notes.common.pubtator3.reference.client.infrastructure.RequestMethod
+import notes.common.pubtator3.reference.client.infrastructure.ResponseType
+import notes.common.pubtator3.reference.client.infrastructure.ServerError
+import notes.common.pubtator3.reference.client.infrastructure.ServerException
+import notes.common.pubtator3.reference.client.infrastructure.Success
 
 class DefaultApi(basePath: kotlin.String = "/") : ApiClient(basePath) {
 
@@ -38,9 +46,9 @@ class DefaultApi(basePath: kotlin.String = "/") : ApiClient(basePath) {
     @Suppress("UNCHECKED_CAST")
     fun apiCopyPost(body: ApiCopyBody): InlineResponse2001 {
         val localVariableBody: kotlin.Any? = body
-        val localVariableConfig = RequestConfig(
-                RequestMethod.POST,
-                "/api/copy"
+        val localVariableConfig = notes.common.pubtator3.reference.client.infrastructure.RequestConfig(
+            RequestMethod.POST,
+            "/api/copy"
         )
         val response = request<InlineResponse2001>(
                 localVariableConfig, localVariableBody
@@ -63,9 +71,9 @@ class DefaultApi(basePath: kotlin.String = "/") : ApiClient(basePath) {
     @Suppress("UNCHECKED_CAST")
     fun apiCreatePost(body: ApiCreateBody): InlineResponse2001 {
         val localVariableBody: kotlin.Any? = body
-        val localVariableConfig = RequestConfig(
-                RequestMethod.POST,
-                "/api/create"
+        val localVariableConfig = notes.common.pubtator3.reference.client.infrastructure.RequestConfig(
+            RequestMethod.POST,
+            "/api/create"
         )
         val response = request<InlineResponse2001>(
                 localVariableConfig, localVariableBody
@@ -90,9 +98,9 @@ class DefaultApi(basePath: kotlin.String = "/") : ApiClient(basePath) {
         val localVariableQuery: MultiValueMap = mutableMapOf<kotlin.String, kotlin.collections.List<kotlin.String>>().apply {
             put("model", listOf(model.toString()))
         }
-        val localVariableConfig = RequestConfig(
-                RequestMethod.DELETE,
-                "/api/delete", query = localVariableQuery
+        val localVariableConfig = notes.common.pubtator3.reference.client.infrastructure.RequestConfig(
+            RequestMethod.DELETE,
+            "/api/delete", query = localVariableQuery
         )
         val response = request<InlineResponse2001>(
                 localVariableConfig
@@ -115,9 +123,9 @@ class DefaultApi(basePath: kotlin.String = "/") : ApiClient(basePath) {
     @Suppress("UNCHECKED_CAST")
     fun apiEmbeddingsPost(body: ApiEmbeddingsBody): InlineResponse2005 {
         val localVariableBody: kotlin.Any? = body
-        val localVariableConfig = RequestConfig(
-                RequestMethod.POST,
-                "/api/embeddings"
+        val localVariableConfig = notes.common.pubtator3.reference.client.infrastructure.RequestConfig(
+            RequestMethod.POST,
+            "/api/embeddings"
         )
         val response = request<InlineResponse2005>(
                 localVariableConfig, localVariableBody
@@ -140,9 +148,9 @@ class DefaultApi(basePath: kotlin.String = "/") : ApiClient(basePath) {
     @Suppress("UNCHECKED_CAST")
     fun apiGeneratePost(body: ApiGenerateBody): InlineResponse200 {
         val localVariableBody: kotlin.Any? = body
-        val localVariableConfig = RequestConfig(
-                RequestMethod.POST,
-                "/api/generate"
+        val localVariableConfig = notes.common.pubtator3.reference.client.infrastructure.RequestConfig(
+            RequestMethod.POST,
+            "/api/generate"
         )
         val response = request<InlineResponse200>(
                 localVariableConfig, localVariableBody
@@ -165,9 +173,9 @@ class DefaultApi(basePath: kotlin.String = "/") : ApiClient(basePath) {
     @Suppress("UNCHECKED_CAST")
     fun apiPullPost(body: ApiPullBody): InlineResponse2004 {
         val localVariableBody: kotlin.Any? = body
-        val localVariableConfig = RequestConfig(
-                RequestMethod.POST,
-                "/api/pull"
+        val localVariableConfig = notes.common.pubtator3.reference.client.infrastructure.RequestConfig(
+            RequestMethod.POST,
+            "/api/pull"
         )
         val response = request<InlineResponse2004>(
                 localVariableConfig, localVariableBody
@@ -190,9 +198,9 @@ class DefaultApi(basePath: kotlin.String = "/") : ApiClient(basePath) {
     @Suppress("UNCHECKED_CAST")
     fun apiPushPost(body: ApiPushBody): InlineResponse2001 {
         val localVariableBody: kotlin.Any? = body
-        val localVariableConfig = RequestConfig(
-                RequestMethod.POST,
-                "/api/push"
+        val localVariableConfig = notes.common.pubtator3.reference.client.infrastructure.RequestConfig(
+            RequestMethod.POST,
+            "/api/push"
         )
         val response = request<InlineResponse2001>(
                 localVariableConfig, localVariableBody
@@ -215,9 +223,9 @@ class DefaultApi(basePath: kotlin.String = "/") : ApiClient(basePath) {
     @Suppress("UNCHECKED_CAST")
     fun apiShowPost(body: ApiShowBody): InlineResponse2003 {
         val localVariableBody: kotlin.Any? = body
-        val localVariableConfig = RequestConfig(
-                RequestMethod.POST,
-                "/api/show"
+        val localVariableConfig = notes.common.pubtator3.reference.client.infrastructure.RequestConfig(
+            RequestMethod.POST,
+            "/api/show"
         )
         val response = request<InlineResponse2003>(
                 localVariableConfig, localVariableBody
@@ -238,9 +246,9 @@ class DefaultApi(basePath: kotlin.String = "/") : ApiClient(basePath) {
      */
     @Suppress("UNCHECKED_CAST")
     fun apiTagsGet(): InlineResponse2002 {
-        val localVariableConfig = RequestConfig(
-                RequestMethod.GET,
-                "/api/tags"
+        val localVariableConfig = notes.common.pubtator3.reference.client.infrastructure.RequestConfig(
+            RequestMethod.GET,
+            "/api/tags"
         )
         val response = request<InlineResponse2002>(
                 localVariableConfig

@@ -12,9 +12,12 @@ fun collectionDelimiter(collectionFormat: String) = when (collectionFormat) {
 
 val defaultMultiValueConverter: (item: Any?) -> String = { item -> "$item" }
 
-fun <T : Any?> toMultiValue(items: List<T>, collectionFormat: String, map: (item: Any?) -> String = defaultMultiValueConverter): List<String> {
+fun <T : Any?> toMultiValue(items: List<T>, collectionFormat: String, map: (item: Any?) -> String = notes.common.pubtator3.reference.client.infrastructure.defaultMultiValueConverter): List<String> {
     return when (collectionFormat) {
         "multi" -> items.map(map)
-        else -> listOf(items.map(map).joinToString(separator = collectionDelimiter(collectionFormat)))
+        else -> listOf(items.map(map).joinToString(separator = notes.common.pubtator3.reference.client.infrastructure.collectionDelimiter(
+            collectionFormat
+        )
+        ))
     }
 }

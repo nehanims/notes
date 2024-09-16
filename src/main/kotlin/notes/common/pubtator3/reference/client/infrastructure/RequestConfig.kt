@@ -1,6 +1,6 @@
-package io.swagger.client.infrastructure
+package notes.common.pubtator3.reference.client.infrastructure
 
-import notes.common.pubtator3.reference.client.infrastructure.RequestMethod
+
 
 /**
  * Defines a config object for a given request.

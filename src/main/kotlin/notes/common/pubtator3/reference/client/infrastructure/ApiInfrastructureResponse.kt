@@ -1,7 +1,4 @@
-package io.swagger.client.infrastructure
-
-import notes.common.pubtator3.reference.client.infrastructure.ApiInfrastructureResponse
-import notes.common.pubtator3.reference.client.infrastructure.ResponseType
+package notes.common.pubtator3.reference.client.infrastructure
 
 enum class ResponseType {
     Success, Informational, Redirection, ClientError, ServerError

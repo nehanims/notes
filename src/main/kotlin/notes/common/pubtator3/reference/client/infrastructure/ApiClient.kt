@@ -1,15 +1,6 @@
-package io.swagger.client.infrastructure
+package notes.common.pubtator3.reference.client.infrastructure
 
-import notes.common.pubtator3.reference.client.infrastructure.ApiInfrastructureResponse
-import notes.common.pubtator3.reference.client.infrastructure.ApplicationDelegates
-import notes.common.pubtator3.reference.client.infrastructure.ClientError
-import notes.common.pubtator3.reference.client.infrastructure.Informational
-import notes.common.pubtator3.reference.client.infrastructure.Redirection
-import notes.common.pubtator3.reference.client.infrastructure.RequestConfig
-import notes.common.pubtator3.reference.client.infrastructure.RequestMethod
-import notes.common.pubtator3.reference.client.infrastructure.Serializer
-import notes.common.pubtator3.reference.client.infrastructure.ServerError
-import notes.common.pubtator3.reference.client.infrastructure.Success
+
 import okhttp3.*
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -27,7 +18,9 @@ open class ApiClient(val baseUrl: String) {
         val client: OkHttpClient = OkHttpClient()
 
         @JvmStatic
-        var defaultHeaders: Map<String, String> by ApplicationDelegates.setOnce(mapOf(ContentType to JsonMediaType, Accept to JsonMediaType))
+        var defaultHeaders: Map<String, String> by notes.common.pubtator3.reference.client.infrastructure.ApplicationDelegates.setOnce(
+            mapOf(ContentType to JsonMediaType, Accept to JsonMediaType)
+        )
 
         @JvmStatic
         val jsonHeaders: Map<String, String> = mapOf(ContentType to JsonMediaType, Accept to JsonMediaType)
@@ -47,7 +40,7 @@ open class ApiClient(val baseUrl: String) {
                     builder.build()
                 }
                 mediaType == JsonMediaType -> RequestBody.create(
-                        mediaType.toMediaTypeOrNull(), Serializer.moshi.adapter(T::class.java).toJson(content)
+                        mediaType.toMediaTypeOrNull(), notes.common.pubtator3.reference.client.infrastructure.Serializer.moshi.adapter(T::class.java).toJson(content)
                 )
                 mediaType == XmlMediaType -> TODO("xml not currently supported.")
 
@@ -58,12 +51,12 @@ open class ApiClient(val baseUrl: String) {
     protected inline fun <reified T : Any?> responseBody(body: ResponseBody?, mediaType: String = JsonMediaType): T? {
         if (body == null) return null
         return when (mediaType) {
-            JsonMediaType -> Serializer.moshi.adapter(T::class.java).fromJson(body.source())
+            JsonMediaType -> notes.common.pubtator3.reference.client.infrastructure.Serializer.moshi.adapter(T::class.java).fromJson(body.source())
             else -> TODO()
         }
     }
 
-    protected inline fun <reified T : Any?> request(requestConfig: RequestConfig, body: Any? = null): ApiInfrastructureResponse<T?> {
+    protected inline fun <reified T : Any?> request(requestConfig: notes.common.pubtator3.reference.client.infrastructure.RequestConfig, body: Any? = null): ApiInfrastructureResponse<T?> {
         val httpUrl = baseUrl.toHttpUrlOrNull() ?: throw IllegalStateException("baseUrl is invalid.")
 
         var urlBuilder = httpUrl.newBuilder()

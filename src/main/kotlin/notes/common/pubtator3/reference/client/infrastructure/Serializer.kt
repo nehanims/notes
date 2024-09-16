@@ -1,10 +1,9 @@
-package io.swagger.client.infrastructure
+package notes.common.pubtator3.reference.client.infrastructure
 
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.adapters.Rfc3339DateJsonAdapter
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import notes.common.pubtator3.reference.client.infrastructure.LocalDateAdapter
-import notes.common.pubtator3.reference.client.infrastructure.LocalDateTimeAdapter
+import io.swagger.client.infrastructure.LocalDateAdapter
 import java.util.Date
 
 object Serializer {
@@ -12,7 +11,7 @@ object Serializer {
     val moshi: Moshi = Moshi.Builder()
             .add(KotlinJsonAdapterFactory())
             .add(Date::class.java, Rfc3339DateJsonAdapter().nullSafe())
-            .add(LocalDateTimeAdapter())
+            .add(notes.common.pubtator3.reference.client.infrastructure.LocalDateTimeAdapter())
             .add(LocalDateAdapter())
             .build()
 }
