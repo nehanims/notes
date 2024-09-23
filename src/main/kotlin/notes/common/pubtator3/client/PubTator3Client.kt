@@ -3,6 +3,10 @@ package notes.common.pubtator3.client
 import notes.common.pubtator3.model.EntityAutocomplete
 import notes.common.pubtator3.model.EntityRelation
 import notes.common.pubtator3.model.SearchResults
+import org.springframework.core.io.InputStreamResource
+import org.springframework.core.io.Resource
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.service.annotation.GetExchange
 import org.springframework.web.service.annotation.HttpExchange
@@ -30,6 +34,12 @@ public interface PubTator3Client {
         @RequestParam(required = false) type: String? = null,
         @RequestParam(required = false) e2: String? = null
     ): List<EntityRelation>
+
+    @GetExchange("/publications/export/biocjson")
+    fun exportPublications(
+        @RequestParam pmids: String,
+        @RequestParam(required = false) full: Boolean? = null
+    ): String
 
 }
 

@@ -1,3 +1,5 @@
+version: '3.7'
+
 services:
   kafka:
     image: bitnami/kafka:latest
@@ -23,10 +25,31 @@ services:
       - "9092:9092"
       - "9093:9093"
 
+
+  minio:
+    image: minio/minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio-data:/data
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"
+    restart: unless-stopped
+    networks:
+      - kafka-net
+
+# Need to create the network if it does not exist
 networks:
   kafka-net:
     external: true
 
+# Need to create the volumes if they do not exist
 volumes:
   kafka-data:
     external: true
+  minio-data:
+    external: true
+

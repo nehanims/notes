@@ -15,6 +15,7 @@ class PubTator3Config {
         val webClient = WebClient.builder()
             //.baseUrl(pubtator3Url)
             .baseUrl("https://www.ncbi.nlm.nih.gov/")//TODO: remove hardcoded url see why value injection is not working.. why is it extracting just the host IP from the url? is it because of name being ollama.host?!?
+            .codecs { configurer -> configurer.defaultCodecs().maxInMemorySize(10 * 1024 * 1024) }
             .build()
         val httpServiceProxyFactory =
             HttpServiceProxyFactory.builderFor(WebClientAdapter.create(webClient))

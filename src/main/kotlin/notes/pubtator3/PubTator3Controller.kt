@@ -5,10 +5,19 @@ import notes.common.pubtator3.model.SearchResults
 import notes.common.pubtator3.model.EntityAutocomplete
 import notes.common.pubtator3.model.EntityRelation
 import org.slf4j.LoggerFactory
+import org.springframework.core.io.InputStreamResource
+import org.springframework.core.io.Resource
+import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
+import java.io.ByteArrayInputStream
+import java.io.InputStream
+import java.nio.charset.StandardCharsets
 
 @RestController
 @RequestMapping("/research/pubtator3-api/")
@@ -71,6 +80,60 @@ class PubTator3Controller (private val pubtator3Client: PubTator3Client){
         @RequestParam(required = false) e2: String? = null
     ): List<EntityRelation>{
         return pubtator3Client.findRelatedEntities(e1, type, e2)
+    }
+
+    /**
+     * Export Publications
+     * This endpoint allows users to export a list of publications based on a list of PubMed IDs.
+     * @param pmids List of PubMed IDs to export publications for.
+     * @param full Export full text of publications (optional)
+     * @return String
+     */
+    @GetMapping("/publications/export/biocjson")
+    fun exportPublications(
+        @RequestParam pmids: String,
+        @RequestParam(required = false) full: Boolean? = null
+    ): String {
+        return  pubtator3Client.exportPublications(pmids, full)
+    }
+
+    /**
+     * Get Entity Types
+     * This endpoint returns a list of valid entity types that can be used in the \&quot;Find Related Entities\&quot; endpoint.
+     * @return List<String>
+     */
+    @GetMapping("/entity/types")
+    fun getEntityTypes(): List<String> {
+        return listOf("gene", "disease", "chemical", "species", "mutation", "variant", "cell_line", "cell-line")
+    }
+
+    /**
+     * Get Relation Types
+     * This endpoint returns a list of valid relation types that can be used in the \&quot;Find Related Entities\&quot; endpoint.
+     * @return List<String>
+     */
+    @GetMapping("/relation/types")
+    fun getRelationTypes(): List<String> {
+        return listOf(
+            "treat",
+            "negative_correlate",
+            "positive_correlate",
+            "correlate",
+            "contraindicate",
+            "indicate",
+            "interact",
+            "interacts_with",
+            "causes",
+            "caused_by",
+            "prevents",
+            "prevented_by",
+            "diagnose",
+            "diagnosed_by",
+            "complicate",
+            "complicated_by",
+            "treats",
+            "treated"
+        )
     }
 
 }
