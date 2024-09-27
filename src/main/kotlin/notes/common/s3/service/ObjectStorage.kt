@@ -6,5 +6,7 @@ import java.io.InputStream
 interface ObjectStorageService {
     fun uploadTextString(bucketName: String, objectName: String, content: String)
 
+    //fun updateTextFile(bucketName: String, objectName: String, content: String)
+
     fun getTextFileStream(filename: String, bucketName: String): String
 }

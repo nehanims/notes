@@ -95,7 +95,12 @@ class TranscriptionService(
 
     }
 
-
+    fun updateTranscription(filename: String, transcription: String): String {
+        val transcriptionRecord = repository.findByTranscriptionFilename(filename)
+        // TODO handle null case - will the previous statement automatically throw an exception in the null case since findByTranscriptionFilename returns a non-nullable?
+        objectStorageService.uploadTextString(minioBucketName, filename, transcription)
+        return "Transcription updated"
+    }
 
 
 }

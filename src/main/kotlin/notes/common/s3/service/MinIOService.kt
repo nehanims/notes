@@ -30,6 +30,14 @@ class MinIOService(private val minioClient: MinioClient,) : ObjectStorageService
         log.info("Uploaded string to MinIO")
     }
 
+    /*
+    override fun updateTextFile(bucketName: String, objectName: String, content: String) {
+
+    }
+
+     */
+
+
     override fun getTextFileStream(filename: String, bucketName: String): String {
         val stream: InputStream = minioClient.getObject(
             GetObjectArgs.builder()

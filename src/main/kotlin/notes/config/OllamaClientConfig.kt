@@ -15,10 +15,10 @@ import org.springframework.web.service.invoker.HttpServiceProxyFactory
 class OllamaClientConfig {
 
     @Bean
-    fun ollamaClient(@Value("\${ollama.host}") ollamaUrl:String, webProperties: WebProperties): notes.common.ollama.client.OllamaClient {
+    fun ollamaClient(@Value("\${ollama.url}") ollamaUrl:String, webProperties: WebProperties): notes.common.ollama.client.OllamaClient {
         val webClient = WebClient.builder()
-            //.baseUrl(ollamaUrl)
-            .baseUrl("http://192.168.50.35:11434")//TODO: remove hardcoded url see why value injection is not working.. why is it extracting just the host IP from the url? is it because of name being ollama.host?!?
+            .baseUrl(ollamaUrl)
+            //.baseUrl("http://localhost:11434")//TODO: remove hardcoded url see why value injection is not working.. why is it extracting just the host IP from the url? is it because of name being ollama.host?!?
             .build()
         val httpServiceProxyFactory =
             HttpServiceProxyFactory.builderFor(WebClientAdapter.create(webClient))
