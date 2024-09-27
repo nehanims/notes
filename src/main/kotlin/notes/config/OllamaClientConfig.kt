@@ -18,7 +18,6 @@ class OllamaClientConfig {
     fun ollamaClient(@Value("\${ollama.url}") ollamaUrl:String, webProperties: WebProperties): notes.common.ollama.client.OllamaClient {
         val webClient = WebClient.builder()
             .baseUrl(ollamaUrl)
-            //.baseUrl("http://localhost:11434")//TODO: remove hardcoded url see why value injection is not working.. why is it extracting just the host IP from the url? is it because of name being ollama.host?!?
             .build()
         val httpServiceProxyFactory =
             HttpServiceProxyFactory.builderFor(WebClientAdapter.create(webClient))
