@@ -40,3 +40,4 @@ out/
 .kotlin
 /data/voice-notes-db.mv.db
 /data/voice-notes-db.trace.db
+/build/classes/kotlin/main/notes/common/pubtator3/reference/client/models/Annotation.class
