@@ -37,3 +37,11 @@ The Intelligent Chat Assistant is a sophisticated, fully locally-hosted voice ch
 - Migration to a fully reactive backend using Spring WebFlux
 - Implementation of Retrieval-Augmented Generation (RAG) for improved contextual understanding
 
+## Citations
+This project uses PubTator3 for biomedical literature annotation. If you make use of PubTator3 in your own work, please cite the following paper:
+
+Wei, C.H.*, Allot, A.*, Lai, P.T., Leaman, R., Tian, S., Luo, L., Jin, Q., Wang, Z., Chen, Q., & Lu, Z. (2024).  
+PubTator 3.0: an AI-powered literature resource for unlocking biomedical knowledge.  
+*Nucleic Acids Research*.
+
+
